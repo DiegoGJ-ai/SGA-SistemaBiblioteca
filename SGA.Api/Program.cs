@@ -1,14 +1,13 @@
 using Microsoft.EntityFrameworkCore;
 using SG.IOC;
-using SGA.Persistence.Contexts;
+using SGA.Persistence.Context;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// DbContext (SQL Server de ejemplo)
-builder.Services.AddDbContext<SgaDbContext>(opt =>
+builder.Services.AddDbContext<LibraryContext>(opt =>
     opt.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
-builder.Services.AddSgaServices(); // registra repos y servicios
+builder.Services.AddSgaServices();
 
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();

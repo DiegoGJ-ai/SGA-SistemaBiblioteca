@@ -1,22 +1,28 @@
 ﻿using SGA.Application.Interfaces;
-using SGA.Domain.Entities;
-using System.Collections.Generic;
-using System.Threading.Tasks;
+using SGA.Application.Mappers;
+using SGA.Domain.Repository;     // ← IMPORTANTE: usar el namespace de Domain
+using SGA.Model.Dtos;
+using SGA.Model.Requests;
 
-namespace SGA.Application.Services
+namespace SGA.Application.Services;
+
+public class LibroService : ILibroService
 {
-    public class LibroService : ILibroService
-    {
-        public Task<IReadOnlyList<Libro>> ListarAsync()
-        {
-            // Ejemplo simple, luego se conecta con Persistence
-            var libros = new List<Libro>
-            {
-                new Libro { Id = 1, Titulo = "Cien años de soledad", Autor = "García Márquez" },
-                new Libro { Id = 2, Titulo = "Don Quijote de la Mancha", Autor = "Cervantes" }
-            };
+    private readonly ILibroRepository _repo;
 
-            return Task.FromResult<IReadOnlyList<Libro>>(libros);
-        }
+    public LibroService(ILibroRepository repo) => _repo = repo;
+
+    public async Task<IReadOnlyList<LibroDto>> ListarAsync()
+    {
+        var items = await _repo.ListAsync();
+        return items.Select(LibroMapper.ToDto).ToList();
+    }
+
+    public async Task<LibroDto> CrearAsync(CrearLibroRequest request)
+    {
+        var entity = LibroMapper.ToEntity(request);
+        await _repo.AddAsync(entity);
+        var created = await _repo.GetByIdAsync(entity.Id) ?? entity;
+        return LibroMapper.ToDto(created);
     }
 }

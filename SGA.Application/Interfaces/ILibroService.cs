@@ -1,11 +1,10 @@
-﻿using SGA.Domain.Entities;
-using System.Collections.Generic;
-using System.Threading.Tasks;
+﻿using SGA.Model.Dtos;
+using SGA.Model.Requests;
 
-namespace SGA.Application.Interfaces
+namespace SGA.Application.Interfaces;
+
+public interface ILibroService
 {
-    public interface ILibroService
-    {
-        Task<IReadOnlyList<Libro>> ListarAsync();
-    }
+    Task<IReadOnlyList<LibroDto>> ListarAsync();
+    Task<LibroDto> CrearAsync(CrearLibroRequest request);
 }

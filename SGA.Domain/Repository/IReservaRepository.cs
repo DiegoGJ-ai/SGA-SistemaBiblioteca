@@ -2,8 +2,4 @@
 
 namespace SGA.Domain.Repository;
 
-public interface IReservaRepository
-{
-    Task CrearReservaAsync(int libroId);
-    Task<Reserva?> SiguienteReservaAsync(int libroId);
-}
+public interface IReservaRepository : IRepositoryBase<Reserva> { }

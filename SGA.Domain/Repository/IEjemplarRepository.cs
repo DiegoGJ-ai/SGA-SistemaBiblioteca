@@ -2,7 +2,7 @@
 
 namespace SGA.Domain.Repository;
 
-public interface IEjemplarRepository
+public interface IEjemplarRepository : IRepositoryBase<Ejemplar>
 {
     Task<Ejemplar?> GetDisponiblePorLibroAsync(int libroId);
 }

@@ -1,15 +1,19 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using SGA.Domain.Entities;
 using SGA.Domain.Repository;
+using SGA.Persistence.Base;
 using SGA.Persistence.Context;
 
 namespace SGA.Persistence.Repositories;
 
-public class EjemplarRepository : IEjemplarRepository
+public class EjemplarRepository : BaseRepository<Ejemplar>, IEjemplarRepository
 {
-    private readonly LibraryContext _context;
-    public EjemplarRepository(LibraryContext context) => _context = context;
+    public EjemplarRepository(LibraryContext context) : base(context) { }
 
-    public Task<Ejemplar?> GetDisponiblePorLibroAsync(int libroId) =>
-        _context.Ejemplares.FirstOrDefaultAsync(x => x.LibroId == libroId && x.Disponible);
+    public async Task<Ejemplar?> GetDisponiblePorLibroAsync(int libroId)
+    {
+        return await _context.Ejemplares
+            .AsNoTracking()
+            .FirstOrDefaultAsync(e => e.LibroId == libroId);
+    }
 }

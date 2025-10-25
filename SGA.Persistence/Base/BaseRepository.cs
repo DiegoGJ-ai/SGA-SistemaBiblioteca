@@ -1,30 +1,41 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using SGA.Domain.Repository;
+using SGA.Persistence.Context;
 
 namespace SGA.Persistence.Base;
 
-public class BaseRepository<T> where T : class
+public class BaseRepository<T> : IRepositoryBase<T> where T : class
 {
-    protected readonly DbContext Context;
-    public BaseRepository(DbContext context) => Context = context;
+    protected readonly LibraryContext _context;
 
-    public virtual async Task<T?> GetByIdAsync(object id) => await Context.Set<T>().FindAsync(id);
-    public virtual async Task<IReadOnlyList<T>> ListAsync() => await Context.Set<T>().AsNoTracking().ToListAsync();
-
-    public virtual async Task AddAsync(T entity)
+    public BaseRepository(LibraryContext context)
     {
-        Context.Set<T>().Add(entity);
-        await Context.SaveChangesAsync();
+        _context = context;
     }
 
-    public virtual async Task UpdateAsync(T entity)
+    public async Task<IReadOnlyList<T>> ListAsync()
+        => await _context.Set<T>().AsNoTracking().ToListAsync();
+
+    public async Task<T?> GetByIdAsync(int id)
+        => await _context.Set<T>().FindAsync(id);
+
+    public async Task AddAsync(T entity)
     {
-        Context.Set<T>().Update(entity);
-        await Context.SaveChangesAsync();
+        await _context.Set<T>().AddAsync(entity);
+        await _context.SaveChangesAsync();
     }
 
-    public virtual async Task DeleteAsync(T entity)
+    public async Task UpdateAsync(T entity)
     {
-        Context.Set<T>().Remove(entity);
-        await Context.SaveChangesAsync();
+        _context.Set<T>().Update(entity);
+        await _context.SaveChangesAsync();
+    }
+
+    public async Task DeleteAsync(int id)
+    {
+        var entity = await GetByIdAsync(id);
+        if (entity == null) return;
+        _context.Set<T>().Remove(entity);
+        await _context.SaveChangesAsync();
     }
 }

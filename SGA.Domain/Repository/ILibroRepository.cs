@@ -1,14 +1,14 @@
 ﻿using SGA.Domain.Entities;
 
-namespace SGA.Domain.Repository;
-
-public interface ILibroRepository
+namespace SGA.Domain.Repository
 {
-    Task<Libro?> GetByIdAsync(int id);
-    Task<IReadOnlyList<Libro>> ListAsync();
-    Task AddAsync(Libro entity);
-    Task UpdateAsync(Libro entity);
-    Task DeleteAsync(int id);
-
-    Task<IReadOnlyList<Libro>> BuscarPorAutorAsync(int autorId);
+    public interface ILibroRepository
+    {
+        Task AddAsync(Libro libro);
+        Task DeleteAsync(int id);
+        Task<Libro?> GetByIdAsync(int id);
+        Task<IReadOnlyList<Libro>> ListAsync(); 
+        Task UpdateAsync(Libro libro);
+        Task<IReadOnlyList<Libro>> BuscarPorAutorAsync(int autorId); 
+    }
 }

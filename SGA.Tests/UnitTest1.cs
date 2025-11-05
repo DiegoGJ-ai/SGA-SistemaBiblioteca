@@ -1,4 +1,4 @@
-namespace SGA.Persistence.Test
+namespace SGA.Tests
 {
     public class UnitTest1
     {

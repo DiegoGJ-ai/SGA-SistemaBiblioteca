@@ -12,9 +12,11 @@ namespace SG.IOC
         {
             
             services.AddScoped<ILibroRepository, LibroRepository>();
-
-          
             services.AddScoped<ILibroService, LibroService>();
+
+            
+            services.AddScoped<IAutorRepository, AutorRepository>();
+            services.AddScoped<IAutorService, AutorService>();
 
             return services;
         }

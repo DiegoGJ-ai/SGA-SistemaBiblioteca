@@ -2,28 +2,61 @@
 using SGA.Application.Interfaces;
 using SGA.Model.Dtos;
 using SGA.Model.Requests;
-using SGA.Model.Responses;
 
-namespace SGA.Api.Controllers;
-
-[ApiController]
-[Route("api/[controller]")]
-public class LibrosController : ControllerBase
+namespace SGA.Api.Controllers
 {
-    private readonly ILibroService _service;
-    public LibrosController(ILibroService service) => _service = service;
-
-    [HttpGet]
-    public async Task<ActionResult<ApiResponse<IReadOnlyList<LibroDto>>>> Get()
+    [ApiController]
+    [Route("api/[controller]")]
+    public class LibrosController : ControllerBase
     {
-        var data = await _service.ListarAsync();
-        return Ok(ApiResponse<IReadOnlyList<LibroDto>>.Ok(data));
-    }
+        private readonly ILibroService _service;
 
-    [HttpPost]
-    public async Task<ActionResult<ApiResponse<LibroDto>>> Post([FromBody] CrearLibroRequest request)
-    {
-        var dto = await _service.CrearAsync(request);
-        return Ok(ApiResponse<LibroDto>.Ok(dto, "Libro creado"));
+        public LibrosController(ILibroService service)
+        {
+            _service = service;
+        }
+
+        
+        [HttpGet]
+        public async Task<IActionResult> Get()
+        {
+            var libros = await _service.ListarAsync();
+            return Ok(libros);
+        }
+
+        
+        [HttpGet("{id}")]
+        public async Task<IActionResult> GetById(int id)
+        {
+            var libro = await _service.BuscarPorIdAsync(id);
+            if (libro == null)
+                return NotFound($"El libro con ID {id} no existe");
+
+            return Ok(libro);
+        }
+
+        
+        [HttpPost]
+        public async Task<IActionResult> Create([FromBody] CrearLibroRequest request)
+        {
+            var libroCreado = await _service.CrearAsync(request);
+            return CreatedAtAction(nameof(GetById), new { id = libroCreado.Id }, libroCreado);
+        }
+
+        
+        [HttpPut("{id}")]
+        public async Task<IActionResult> Update(int id, [FromBody] CrearLibroRequest request)
+        {
+            await _service.ActualizarAsync(id, request);
+            return NoContent();
+        }
+
+       
+        [HttpDelete("{id}")]
+        public async Task<IActionResult> Delete(int id)
+        {
+            await _service.EliminarAsync(id);
+            return NoContent();
+        }
     }
 }

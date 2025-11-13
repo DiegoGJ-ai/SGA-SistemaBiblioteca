@@ -18,7 +18,7 @@ namespace SGA.Application.Services
         public async Task<LibroDto> CrearAsync(CrearLibroRequest request)
         {
             if (string.IsNullOrWhiteSpace(request.Titulo))
-                throw new ArgumentException("El título del libro no puede estar vacío.");
+                throw new ArgumentException("El título del libro no puede estar vacío");
 
             var libro = new Libro
             {
@@ -39,6 +39,7 @@ namespace SGA.Application.Services
         public async Task<IEnumerable<LibroDto>> ListarAsync()
         {
             var libros = await _repo.ListAsync();
+
             return libros.Select(l => new LibroDto
             {
                 Id = l.Id,
@@ -50,7 +51,8 @@ namespace SGA.Application.Services
         public async Task<LibroDto?> BuscarPorIdAsync(int id)
         {
             var libro = await _repo.GetByIdAsync(id);
-            if (libro == null) return null;
+            if (libro == null)
+                return null;
 
             return new LibroDto
             {
@@ -69,7 +71,7 @@ namespace SGA.Application.Services
         {
             var libro = await _repo.GetByIdAsync(id);
             if (libro == null)
-                throw new ArgumentException("El libro no existe.");
+                throw new ArgumentException("El libro no existe");
 
             libro.Titulo = request.Titulo;
             libro.AutorId = request.AutorId;

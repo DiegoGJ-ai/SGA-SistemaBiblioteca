@@ -1,22 +1,33 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk.Web">
 
-  <PropertyGroup>
-    <TargetFramework>net8.0</TargetFramework>
-    <Nullable>enable</Nullable>
-    <ImplicitUsings>enable</ImplicitUsings>
-  </PropertyGroup>
+	<PropertyGroup>
+		<TargetFramework>net8.0</TargetFramework>
+		<Nullable>enable</Nullable>
+		<ImplicitUsings>enable</ImplicitUsings>
+	</PropertyGroup>
 
-  <ItemGroup>
-    <PackageReference Include="Microsoft.EntityFrameworkCore" Version="9.0.9" />
-    <PackageReference Include="Swashbuckle.AspNetCore" Version="6.6.2" />
-  </ItemGroup>
+	<ItemGroup>
+		
+		<PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="8.0.6">
+			<PrivateAssets>all</PrivateAssets>
+			<IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+		</PackageReference>
 
-  <ItemGroup>
-    <ProjectReference Include="..\SG.IOC\SG.IOC.csproj" />
-    <ProjectReference Include="..\SGA.Application\SGA.Application.csproj" />
-    <ProjectReference Include="..\SGA.Domain\SGA.Domain.csproj" />
-    <ProjectReference Include="..\SGA.Model\SGA.Model.csproj" />
-    <ProjectReference Include="..\SGA.Persistence\SGA.Persistence.csproj" />
-  </ItemGroup>
+		
+		<PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="8.0.6">
+			<PrivateAssets>all</PrivateAssets>
+			<IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+		</PackageReference>
+
+	
+		<PackageReference Include="Swashbuckle.AspNetCore" Version="6.5.0" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<ProjectReference Include="..\SGA.Application\SGA.Application.csproj" />
+		<ProjectReference Include="..\SGA.Model\SGA.Model.csproj" />
+		<ProjectReference Include="..\SGA.Persistence\SGA.Persistence.csproj" />
+		<ProjectReference Include="..\SG.IOC\SG.IOC.csproj" />
+	</ItemGroup>
 
 </Project>

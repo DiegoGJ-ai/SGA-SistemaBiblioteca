@@ -46,7 +46,7 @@ namespace SGA.Persistence.Repositories
             await _context.SaveChangesAsync();
         }
 
-        // ⚠️ Nuevo método requerido por la interfaz
+   
         public async Task<IReadOnlyList<Libro>> BuscarPorAutorAsync(int autorId)
         {
             return await _context.Libros

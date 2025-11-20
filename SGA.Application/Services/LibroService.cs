@@ -15,10 +15,40 @@ namespace SGA.Application.Services
             _repo = repo;
         }
 
+        public async Task<IReadOnlyList<LibroDto>> ListarAsync()
+        {
+            var libros = await _repo.ListAsync(); // IEnumerable<Libro> o IReadOnlyList<Libro>
+
+            return libros
+                .Select(l => new LibroDto
+                {
+                    Id = l.Id,
+                    Titulo = l.Titulo,
+                    AutorId = l.AutorId
+                })
+                .ToList()
+                .AsReadOnly();
+        }
+
+        public async Task<LibroDto?> BuscarPorIdAsync(int id)
+        {
+            var libro = await _repo.GetByIdAsync(id);
+            if (libro == null) return null;
+
+            return new LibroDto
+            {
+                Id = libro.Id,
+                Titulo = libro.Titulo,
+                AutorId = libro.AutorId
+            };
+        }
+
         public async Task<LibroDto> CrearAsync(CrearLibroRequest request)
         {
             if (string.IsNullOrWhiteSpace(request.Titulo))
-                throw new ArgumentException("El título del libro no puede estar vacío");
+            {
+                throw new ArgumentException("El título no puede estar vacío.", nameof(request.Titulo));
+            }
 
             var libro = new Libro
             {
@@ -36,47 +66,23 @@ namespace SGA.Application.Services
             };
         }
 
-        public async Task<IEnumerable<LibroDto>> ListarAsync()
-        {
-            var libros = await _repo.ListAsync();
-
-            return libros.Select(l => new LibroDto
-            {
-                Id = l.Id,
-                Titulo = l.Titulo,
-                AutorId = l.AutorId
-            });
-        }
-
-        public async Task<LibroDto?> BuscarPorIdAsync(int id)
-        {
-            var libro = await _repo.GetByIdAsync(id);
-            if (libro == null)
-                return null;
-
-            return new LibroDto
-            {
-                Id = libro.Id,
-                Titulo = libro.Titulo,
-                AutorId = libro.AutorId
-            };
-        }
-
-        public async Task EliminarAsync(int id)
-        {
-            await _repo.DeleteAsync(id);
-        }
-
         public async Task ActualizarAsync(int id, CrearLibroRequest request)
         {
             var libro = await _repo.GetByIdAsync(id);
             if (libro == null)
-                throw new ArgumentException("El libro no existe");
+            {
+                throw new ArgumentException("El libro no existe.", nameof(id));
+            }
 
             libro.Titulo = request.Titulo;
             libro.AutorId = request.AutorId;
 
             await _repo.UpdateAsync(libro);
+        }
+
+        public async Task EliminarAsync(int id)
+        {
+            await _repo.DeleteAsync(id);
         }
     }
 }

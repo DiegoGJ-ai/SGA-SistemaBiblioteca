@@ -2,6 +2,7 @@
 using SGA.Application.Interfaces;
 using SGA.Model.Dtos;
 using SGA.Model.Requests;
+using SGA.Model.Responses;
 
 namespace SGA.Api.Controllers
 {
@@ -16,47 +17,58 @@ namespace SGA.Api.Controllers
             _service = service;
         }
 
-        
+        // GET api/libros
         [HttpGet]
-        public async Task<IActionResult> Get()
+        public async Task<ActionResult<ApiResponse<IReadOnlyList<LibroDto>>>> Get()
         {
-            var libros = await _service.ListarAsync();
-            return Ok(libros);
+            var data = await _service.ListarAsync();
+
+            var response = ApiResponse<IReadOnlyList<LibroDto>>.Ok(data);
+            return Ok(response);
         }
 
-        
-        [HttpGet("{id}")]
-        public async Task<IActionResult> GetById(int id)
+        // GET api/libros/5
+        [HttpGet("{id:int}")]
+        public async Task<ActionResult<ApiResponse<LibroDto>>> GetById(int id)
         {
-            var libro = await _service.BuscarPorIdAsync(id);
-            if (libro == null)
-                return NotFound($"El libro con ID {id} no existe");
+            var dto = await _service.BuscarPorIdAsync(id);
 
-            return Ok(libro);
+            if (dto == null)
+            {
+                return NotFound(ApiResponse<LibroDto>.Fail("Libro no encontrado"));
+            }
+
+            return Ok(ApiResponse<LibroDto>.Ok(dto));
         }
 
-        
+        // POST api/libros
         [HttpPost]
-        public async Task<IActionResult> Create([FromBody] CrearLibroRequest request)
+        public async Task<ActionResult<ApiResponse<LibroDto>>> Post([FromBody] CrearLibroRequest request)
         {
-            var libroCreado = await _service.CrearAsync(request);
-            return CreatedAtAction(nameof(GetById), new { id = libroCreado.Id }, libroCreado);
+            var dto = await _service.CrearAsync(request);
+
+            var response = ApiResponse<LibroDto>.Ok(dto, "Libro creado correctamente");
+
+            // 201 Created con Location
+            return CreatedAtAction(nameof(GetById), new { id = dto.Id }, response);
         }
 
-        
-        [HttpPut("{id}")]
-        public async Task<IActionResult> Update(int id, [FromBody] CrearLibroRequest request)
+        // PUT api/libros/5
+        [HttpPut("{id:int}")]
+        public async Task<ActionResult<ApiResponse<object>>> Put(int id, [FromBody] CrearLibroRequest request)
         {
             await _service.ActualizarAsync(id, request);
-            return NoContent();
+
+            return Ok(ApiResponse<object>.Ok(null, "Libro actualizado correctamente"));
         }
 
-       
-        [HttpDelete("{id}")]
-        public async Task<IActionResult> Delete(int id)
+        // DELETE api/libros/5
+        [HttpDelete("{id:int}")]
+        public async Task<ActionResult<ApiResponse<object>>> Delete(int id)
         {
             await _service.EliminarAsync(id);
-            return NoContent();
+
+            return Ok(ApiResponse<object>.Ok(null, "Libro eliminado correctamente"));
         }
     }
 }

@@ -1,32 +1,155 @@
 using Microsoft.AspNetCore.Mvc;
-using SGA.Web.Models;
-using System.Diagnostics;
+using SGA.Model.Dtos;
+using SGA.Model.Requests;
+using SGA.Web.Services;
+using System;
+using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace SGA.Web.Controllers
 {
     public class HomeController : Controller
     {
-        private readonly ILogger<HomeController> _logger;
+        private readonly LibroApiClient _libroApiClient;
 
-        public HomeController(ILogger<HomeController> logger)
+        public HomeController(LibroApiClient libroApiClient)
         {
-            _logger = logger;
+            _libroApiClient = libroApiClient;
         }
 
-        public IActionResult Index()
+        // ------------------ LISTAR ------------------
+
+        public async Task<IActionResult> Index()
         {
-            return View();
+            try
+            {
+                IReadOnlyList<LibroDto> libros = await _libroApiClient.GetLibrosAsync();
+                return View(libros);
+            }
+            catch (Exception ex)
+            {
+                ViewData["Error"] = ex.Message;
+                return View(Array.Empty<LibroDto>());
+            }
         }
 
-        public IActionResult Privacy()
+        // ------------------ CREAR ------------------
+
+        [HttpGet]
+        public IActionResult Create()
         {
-            return View();
+            return View(new CrearLibroRequest());
         }
 
-        [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
-        public IActionResult Error()
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Create(CrearLibroRequest model)
         {
-            return View(new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
+            if (!ModelState.IsValid)
+            {
+                return View(model);
+            }
+
+            try
+            {
+                await _libroApiClient.CrearLibroAsync(model);
+                return RedirectToAction(nameof(Index));
+            }
+            catch (Exception ex)
+            {
+                ModelState.AddModelError(string.Empty, ex.Message);
+                return View(model);
+            }
+        }
+
+        // ------------------ EDITAR ------------------
+
+        [HttpGet]
+        public async Task<IActionResult> Edit(int id)
+        {
+            try
+            {
+                var libro = await _libroApiClient.GetLibroAsync(id);
+                if (libro == null)
+                {
+                    return NotFound();
+                }
+
+                var vm = new CrearLibroRequest
+                {
+                    Titulo = libro.Titulo,
+                    AutorId = libro.AutorId
+                };
+
+                ViewBag.LibroId = libro.Id;
+                return View(vm);
+            }
+            catch (Exception ex)
+            {
+                ViewData["Error"] = ex.Message;
+                return RedirectToAction(nameof(Index));
+            }
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Edit(int id, CrearLibroRequest model)
+        {
+            if (!ModelState.IsValid)
+            {
+                ViewBag.LibroId = id;
+                return View(model);
+            }
+
+            try
+            {
+                await _libroApiClient.ActualizarLibroAsync(id, model);
+                return RedirectToAction(nameof(Index));
+            }
+            catch (Exception ex)
+            {
+                ViewBag.LibroId = id;
+                ModelState.AddModelError(string.Empty, ex.Message);
+                return View(model);
+            }
+        }
+
+        // ------------------ ELIMINAR ------------------
+
+        [HttpGet]
+        public async Task<IActionResult> Delete(int id)
+        {
+            try
+            {
+                var libro = await _libroApiClient.GetLibroAsync(id);
+                if (libro == null)
+                {
+                    return NotFound();
+                }
+
+                return View(libro);
+            }
+            catch (Exception ex)
+            {
+                ViewData["Error"] = ex.Message;
+                return RedirectToAction(nameof(Index));
+            }
+        }
+
+        [HttpPost, ActionName("Delete")]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> DeleteConfirmed(int id)
+        {
+            try
+            {
+                await _libroApiClient.EliminarLibroAsync(id);
+                return RedirectToAction(nameof(Index));
+            }
+            catch (Exception ex)
+            {
+                ViewData["Error"] = ex.Message;
+                return RedirectToAction(nameof(Index));
+            }
         }
     }
 }

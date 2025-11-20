@@ -5,10 +5,10 @@ namespace SGA.Application.Interfaces
 {
     public interface ILibroService
     {
-        Task<LibroDto> CrearAsync(CrearLibroRequest request);
-        Task<IEnumerable<LibroDto>> ListarAsync();
+        Task<IReadOnlyList<LibroDto>> ListarAsync();
         Task<LibroDto?> BuscarPorIdAsync(int id);
-        Task EliminarAsync(int id);
+        Task<LibroDto> CrearAsync(CrearLibroRequest request);
         Task ActualizarAsync(int id, CrearLibroRequest request);
+        Task EliminarAsync(int id);
     }
 }

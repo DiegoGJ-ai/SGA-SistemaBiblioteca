@@ -1,29 +1,46 @@
-﻿@using SGA.Model.Requests
-@model CrearLibroRequest
+﻿@model SGA.Model.Requests.CrearLibroRequest
 
 @{
     ViewData["Title"] = "Crear libro";
 }
 
-<h1>Crear libro</h1>
+<div class="row justify-content-center">
+    <div class="col-lg-7 col-md-9">
+        <div class="card shadow-sm">
+            <div class="card-header bg-primary text-white">
+                <h5 class="mb-0">Crear nuevo libro</h5>
+            </div>
+            <div class="card-body">
+                <form asp-action="Create" method="post">
+                    <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
 
-<form asp-action="Create" method="post">
-    <div class="form-group">
-        <label asp-for="Titulo"></label>
-        <input asp-for="Titulo" class="form-control" />
-        <span asp-validation-for="Titulo" class="text-danger"></span>
+                    <div class="mb-3">
+                        <label asp-for="Titulo" class="form-label"></label>
+                        <input asp-for="Titulo" class="form-control" />
+                        <span asp-validation-for="Titulo" class="text-danger"></span>
+                    </div>
+
+                    <div class="mb-3">
+                        <label asp-for="AutorId" class="form-label"></label>
+                        <input asp-for="AutorId" class="form-control" />
+                        <span asp-validation-for="AutorId" class="text-danger"></span>
+                    </div>
+
+                    
+
+                    <div class="d-flex justify-content-between">
+                        <a asp-action="Index" class="btn btn-outline-secondary">
+                            Volver al listado
+                        </a>
+                        <button type="submit" class="btn btn-primary">
+                            Guardar
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
     </div>
-
-    <div class="form-group">
-        <label asp-for="AutorId"></label>
-        <input asp-for="AutorId" class="form-control" />
-        <span asp-validation-for="AutorId" class="text-danger"></span>
-    </div>
-
-    <br />
-    <button type="submit" class="btn btn-primary">Guardar</button>
-    <a asp-action="Index" class="btn btn-secondary">Volver</a>
-</form>
+</div>
 
 @section Scripts {
     @{

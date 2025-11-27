@@ -17,7 +17,7 @@ namespace SGA.Api.Controllers
             _service = service;
         }
 
-        // GET api/libros
+        
         [HttpGet]
         public async Task<ActionResult<ApiResponse<IReadOnlyList<LibroDto>>>> Get()
         {
@@ -27,7 +27,7 @@ namespace SGA.Api.Controllers
             return Ok(response);
         }
 
-        // GET api/libros/5
+        
         [HttpGet("{id:int}")]
         public async Task<ActionResult<ApiResponse<LibroDto>>> GetById(int id)
         {
@@ -41,7 +41,7 @@ namespace SGA.Api.Controllers
             return Ok(ApiResponse<LibroDto>.Ok(dto));
         }
 
-        // POST api/libros
+        
         [HttpPost]
         public async Task<ActionResult<ApiResponse<LibroDto>>> Post([FromBody] CrearLibroRequest request)
         {
@@ -49,11 +49,11 @@ namespace SGA.Api.Controllers
 
             var response = ApiResponse<LibroDto>.Ok(dto, "Libro creado correctamente");
 
-            // 201 Created con Location
+            
             return CreatedAtAction(nameof(GetById), new { id = dto.Id }, response);
         }
 
-        // PUT api/libros/5
+        
         [HttpPut("{id:int}")]
         public async Task<ActionResult<ApiResponse<object>>> Put(int id, [FromBody] CrearLibroRequest request)
         {
@@ -62,7 +62,7 @@ namespace SGA.Api.Controllers
             return Ok(ApiResponse<object>.Ok(null, "Libro actualizado correctamente"));
         }
 
-        // DELETE api/libros/5
+        
         [HttpDelete("{id:int}")]
         public async Task<ActionResult<ApiResponse<object>>> Delete(int id)
         {

@@ -1,39 +1,29 @@
+using System.Linq;
+using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Logging;
 using SGA.Model.Dtos;
 using SGA.Model.Requests;
 using SGA.Web.Services;
-using System;
-using System.Collections.Generic;
-using System.Threading.Tasks;
 
 namespace SGA.Web.Controllers
 {
     public class HomeController : Controller
     {
-        private readonly LibroApiClient _libroApiClient;
+        private readonly ILibroService _libroService;
+        private readonly ILogger<HomeController> _logger;
 
-        public HomeController(LibroApiClient libroApiClient)
+        public HomeController(ILibroService libroService, ILogger<HomeController> logger)
         {
-            _libroApiClient = libroApiClient;
+            _libroService = libroService;
+            _logger = logger;
         }
-
-        // ------------------ LISTAR ------------------
 
         public async Task<IActionResult> Index()
         {
-            try
-            {
-                IReadOnlyList<LibroDto> libros = await _libroApiClient.GetLibrosAsync();
-                return View(libros);
-            }
-            catch (Exception ex)
-            {
-                ViewData["Error"] = ex.Message;
-                return View(Array.Empty<LibroDto>());
-            }
+            var libros = await _libroService.ObtenerLibrosAsync();
+            return View(libros);
         }
-
-        // ------------------ CREAR ------------------
 
         [HttpGet]
         public IActionResult Create()
@@ -42,114 +32,69 @@ namespace SGA.Web.Controllers
         }
 
         [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create(CrearLibroRequest model)
+        public async Task<IActionResult> Create(CrearLibroRequest request)
         {
             if (!ModelState.IsValid)
+                return View(request);
+
+            var ok = await _libroService.CrearLibroAsync(request);
+
+            if (!ok)
             {
-                return View(model);
+                ModelState.AddModelError(string.Empty, "No se pudo crear el libro.");
+                return View(request);
             }
 
-            try
-            {
-                await _libroApiClient.CrearLibroAsync(model);
-                return RedirectToAction(nameof(Index));
-            }
-            catch (Exception ex)
-            {
-                ModelState.AddModelError(string.Empty, ex.Message);
-                return View(model);
-            }
+            return RedirectToAction(nameof(Index));
         }
-
-        // ------------------ EDITAR ------------------
 
         [HttpGet]
         public async Task<IActionResult> Edit(int id)
         {
-            try
-            {
-                var libro = await _libroApiClient.GetLibroAsync(id);
-                if (libro == null)
-                {
-                    return NotFound();
-                }
+            var libros = await _libroService.ObtenerLibrosAsync();
+            var libro = libros.FirstOrDefault(l => l.Id == id);
 
-                var vm = new CrearLibroRequest
-                {
-                    Titulo = libro.Titulo,
-                    AutorId = libro.AutorId
-                };
+            if (libro is null)
+                return NotFound();
 
-                ViewBag.LibroId = libro.Id;
-                return View(vm);
-            }
-            catch (Exception ex)
+            var model = new ActualizarLibroRequest
             {
-                ViewData["Error"] = ex.Message;
-                return RedirectToAction(nameof(Index));
-            }
+                Titulo = libro.Titulo,
+                AutorId = libro.AutorId
+            };
+
+            return View(model);
         }
 
         [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, CrearLibroRequest model)
+        public async Task<IActionResult> Edit(int id, ActualizarLibroRequest request)
         {
             if (!ModelState.IsValid)
+                return View(request);
+
+            var ok = await _libroService.ActualizarLibroAsync(id, request);
+
+            if (!ok)
             {
-                ViewBag.LibroId = id;
-                return View(model);
+                ModelState.AddModelError(string.Empty, "No se pudo actualizar el libro.");
+                return View(request);
             }
 
-            try
-            {
-                await _libroApiClient.ActualizarLibroAsync(id, model);
-                return RedirectToAction(nameof(Index));
-            }
-            catch (Exception ex)
-            {
-                ViewBag.LibroId = id;
-                ModelState.AddModelError(string.Empty, ex.Message);
-                return View(model);
-            }
+            return RedirectToAction(nameof(Index));
         }
 
-        // ------------------ ELIMINAR ------------------
-
-        [HttpGet]
+        [HttpPost]
         public async Task<IActionResult> Delete(int id)
         {
-            try
-            {
-                var libro = await _libroApiClient.GetLibroAsync(id);
-                if (libro == null)
-                {
-                    return NotFound();
-                }
+            var ok = await _libroService.EliminarLibroAsync(id);
 
-                return View(libro);
-            }
-            catch (Exception ex)
+            if (!ok)
             {
-                ViewData["Error"] = ex.Message;
-                return RedirectToAction(nameof(Index));
+                // Podrías mostrar una vista de error, pero para simplificar:
+                return BadRequest("No se pudo eliminar el libro.");
             }
-        }
 
-        [HttpPost, ActionName("Delete")]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> DeleteConfirmed(int id)
-        {
-            try
-            {
-                await _libroApiClient.EliminarLibroAsync(id);
-                return RedirectToAction(nameof(Index));
-            }
-            catch (Exception ex)
-            {
-                ViewData["Error"] = ex.Message;
-                return RedirectToAction(nameof(Index));
-            }
+            return RedirectToAction(nameof(Index));
         }
     }
 }

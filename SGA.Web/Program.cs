@@ -1,18 +1,26 @@
-﻿using SGA.Web.Services;
+﻿using SGA.Web.Clients;
+using SGA.Web.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// MVC
+
 builder.Services.AddControllersWithViews();
 
-// HttpClient para consumir la API
-builder.Services.AddHttpClient<LibroApiClient>(client =>
+
+builder.Services.AddHttpClient<ILibroApiClient, LibroApiClient>(client =>
 {
-    var baseUrl = builder.Configuration["ApiSettings:BaseUrl"];
-    client.BaseAddress = new Uri(baseUrl!);
+    var baseUrl = builder.Configuration["ApiSettings:BaseUrl"]
+                  ?? "https://localhost:7149/";      
+
+    client.BaseAddress = new Uri(baseUrl);
 });
 
+
+builder.Services.AddScoped<ILibroService, LibroService>();
+
+
 var app = builder.Build();
+
 
 if (!app.Environment.IsDevelopment())
 {
@@ -27,7 +35,6 @@ app.UseRouting();
 
 app.UseAuthorization();
 
-// Rutas MVC
 app.MapControllerRoute(
     name: "default",
     pattern: "{controller=Home}/{action=Index}/{id?}");
